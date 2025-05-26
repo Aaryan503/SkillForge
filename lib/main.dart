@@ -13,8 +13,8 @@ void main() async{
     ),
   );
   await Supabase.initialize(
-    anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVrcmd6dG1iZ2x5YmN1dWt4eW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYxNTAyMTEsImV4cCI6MjA2MTcyNjIxMX0.s5N50eAQAuf5rFnfbqhf5NCD5MpgZK2wf8y5m96-laQ",
-    url: "https://ekrgztmbglybcuukxyoe.supabase.co");
+    anonKey: "Insert anon key",
+    url: "Insert project URL");
   
   runApp(ProviderScope(child: MyApp()));
 }
