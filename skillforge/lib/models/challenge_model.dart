@@ -6,12 +6,9 @@ class Challenge {
   final String estimatedTime;
   final String language;
   final String createdBy;
-  final int participants;
-  final String coverImage;
+  final List<String> participants;
   final ChallengeDifficulty difficulty;
   final List<String> tags;
-  final double? progress;
-  final int? daysCompleted;
 
   Challenge({
     required this.id, 
@@ -20,12 +17,9 @@ class Challenge {
     required this.estimatedTime,
     required this.language,
     required this.createdBy,
-    this.participants = 0,
-    this.coverImage = '',
+    required this.participants,
     this.difficulty = ChallengeDifficulty.intermediate,
     this.tags = const [],
-    this.progress,
-    this.daysCompleted,
   });
 }
 
@@ -35,19 +29,19 @@ enum ChallengeDifficulty {
   advanced,
 }
 
-class DailyTask {
-  final int day;
+class Checkpoint {
+  final int index;
   final String title;
   final String description;
   final bool isCompleted;
-  final int durationMinutes;
+  final String challenge_id;
 
-  DailyTask({
-    required this.day,
+  Checkpoint({
+    this.index = 1,
     required this.title,
     required this.description,
     this.isCompleted = false,
-    required this.durationMinutes,
+    required this.challenge_id,
   });
 }
 

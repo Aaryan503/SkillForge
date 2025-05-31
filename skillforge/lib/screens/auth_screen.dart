@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:skillforge/auth/auth_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skillforge/providers/user_provider.dart';
 
-class AuthScreen extends StatefulWidget {
+class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({Key? key}) : super(key: key);
 
   @override
-  _AuthScreenState createState() => _AuthScreenState();
+  ConsumerState<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen>
+class _AuthScreenState extends ConsumerState<AuthScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _isPasswordVisible = false;
@@ -308,14 +309,13 @@ class _AuthScreenState extends State<AuthScreen>
       );
       return;
     }
-    
-    final authService = AuthService();
+
     final email = _loginEmailController.text;
     final password = _loginPasswordController.text;
-    
+
     try {
-      await authService.signInWithEmailPassword(email, password);
-      
+      await ref.read(userProvider.notifier).signIn(email, password);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -361,11 +361,10 @@ class _AuthScreenState extends State<AuthScreen>
 
     final email = _signupEmailController.text;
     final password = _signupPasswordController.text;
-    final authService = AuthService();
-    
+
     try {
-      await authService.signUpWithEmailPassword(email, password);
-      
+      await ref.read(userProvider.notifier).signUp(email, password);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -373,7 +372,6 @@ class _AuthScreenState extends State<AuthScreen>
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {

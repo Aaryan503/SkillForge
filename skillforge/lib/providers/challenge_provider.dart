@@ -29,7 +29,6 @@ class ChallengeState {
   }
 }
 
-// Challenge Notifier
 class ChallengeNotifier extends StateNotifier<ChallengeState> {
   ChallengeNotifier() : super(const ChallengeState(
     allChallenges: [],
@@ -49,8 +48,7 @@ class ChallengeNotifier extends StateNotifier<ChallengeState> {
         estimatedTime: '30 days',
         language: 'Python',
         createdBy: 'Alice Chen',
-        participants: 243,
-        coverImage: 'assets/images/python_cover.png',
+        participants: [],
         difficulty: ChallengeDifficulty.beginner,
         tags: ['Programming', 'Backend'],
       ),
@@ -61,8 +59,7 @@ class ChallengeNotifier extends StateNotifier<ChallengeState> {
         estimatedTime: '10 days',
         language: 'Dart',
         createdBy: 'Robert Kim',
-        participants: 187,
-        coverImage: 'assets/images/flutter_cover.png',
+        participants: [],
         difficulty: ChallengeDifficulty.intermediate,
         tags: ['Mobile', 'UI/UX'],
       ),
@@ -73,8 +70,7 @@ class ChallengeNotifier extends StateNotifier<ChallengeState> {
         estimatedTime: '21 days',
         language: 'JavaScript',
         createdBy: 'Carol Rodriguez',
-        participants: 412,
-        coverImage: 'assets/images/js_cover.png',
+        participants: [],
         difficulty: ChallengeDifficulty.advanced,
         tags: ['Web', 'Frontend'],
       ),
@@ -85,8 +81,7 @@ class ChallengeNotifier extends StateNotifier<ChallengeState> {
         estimatedTime: '45 days',
         language: 'Python',
         createdBy: 'Michael Zhang',
-        participants: 320,
-        coverImage: 'assets/images/data_science_cover.png',
+        participants: [],
         difficulty: ChallengeDifficulty.intermediate,
         tags: ['Data', 'AI/ML'],
       ),
@@ -100,12 +95,9 @@ class ChallengeNotifier extends StateNotifier<ChallengeState> {
         estimatedTime: '10 days',
         language: 'Dart',
         createdBy: 'Robert Kim',
-        participants: 187,
-        coverImage: 'assets/images/flutter_cover.png',
+        participants: [],
         difficulty: ChallengeDifficulty.intermediate,
         tags: ['Mobile', 'UI/UX'],
-        progress: 0.4,
-        daysCompleted: 4,
       ),
     ];
 
@@ -116,30 +108,30 @@ class ChallengeNotifier extends StateNotifier<ChallengeState> {
       );
   }
 
-  void joinChallenge(String challengeId) {
-    final challenge = state.allChallenges.firstWhere((c) => c.id == challengeId);
-    final updatedChallenge = Challenge(
-      id: challenge.id,
-      title: challenge.title,
-      description: challenge.description,
-      estimatedTime: challenge.estimatedTime,
-      language: challenge.language,
-      createdBy: challenge.createdBy,
-      participants: challenge.participants + 1,
-      coverImage: challenge.coverImage,
-      difficulty: challenge.difficulty,
-      tags: challenge.tags,
-      progress: 0.0,
-      daysCompleted: 0,
-    );
+  // void joinChallenge(String challengeId) {
+  //   final challenge = state.allChallenges.firstWhere((c) => c.id == challengeId);
+  //   final updatedChallenge = Challenge(
+  //     id: challenge.id,
+  //     title: challenge.title,
+  //     description: challenge.description,
+  //     estimatedTime: challenge.estimatedTime,
+  //     language: challenge.language,
+  //     createdBy: challenge.createdBy,
+  //     participants: challenge.participants,
+  //     coverImage: challenge.coverImage,
+  //     difficulty: challenge.difficulty,
+  //     tags: challenge.tags,
+  //     progress: 0.0,
+  //     daysCompleted: 0,
+  //   );
 
-    state = state.copyWith(
-      activeChallenges: [...state.activeChallenges, updatedChallenge],
-    );
-  }
+  //   state = state.copyWith(
+  //     activeChallenges: [...state.activeChallenges, updatedChallenge],
+  //   );
+  // }
 
   List<Challenge> get popularChallenges => 
-      state.allChallenges.where((c) => c.participants > 200).toList();
+      state.allChallenges.where((c) => c.participants.length > 200).toList();
 
   List<Challenge> get newChallenges => 
       state.allChallenges.take(2).toList();
@@ -151,7 +143,7 @@ final challengeProvider = StateNotifierProvider<ChallengeNotifier, ChallengeStat
 
 final popularChallengesProvider = Provider<List<Challenge>>((ref) {
   final challengeState = ref.watch(challengeProvider);
-  return challengeState.allChallenges.where((c) => c.participants > 200).toList();
+  return challengeState.allChallenges.where((c) => c.participants.length > 200).toList();
 });
 
 final newChallengesProvider = Provider<List<Challenge>>((ref) {

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/challenge_model.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
 
 class ChallengeDetailScreen extends StatefulWidget {
   final Challenge challenge;
@@ -16,41 +15,41 @@ class _ChallengeDetailScreenState extends State<ChallengeDetailScreen> {
   int _selectedTabIndex = 0;
   
   // fake daily tasks
-  final List<DailyTask> _dailyTasks = [
-    DailyTask(
-      day: 1,
+  final List<Checkpoint> _dailyTasks = [
+    Checkpoint(
+      index: 1,
       title: "Getting Started",
       description: "Set up your development environment and learn the basics",
       isCompleted: true,
-      durationMinutes: 30,
+      challenge_id: '',
     ),
-    DailyTask(
-      day: 2,
+    Checkpoint(
+      index: 2,
       title: "Core Concepts",
       description: "Learn about variables, data types, and basic operations",
       isCompleted: true,
-      durationMinutes: 45,
+      challenge_id: '',
     ),
-    DailyTask(
-      day: 3,
+    Checkpoint(
+      index: 3,
       title: "Control Flow",
       description: "Master conditional statements and loops",
       isCompleted: true,
-      durationMinutes: 60,
+      challenge_id: '',
     ),
-    DailyTask(
-      day: 4,
+    Checkpoint(
+      index: 4,
       title: "Functions & Methods",
       description: "Learn how to create reusable blocks of code",
       isCompleted: false,
-      durationMinutes: 75,
+      challenge_id: '',
     ),
-    DailyTask(
-      day: 5,
+    Checkpoint(
+      index: 5,
       title: "Object-Oriented Programming",
       description: "Understand classes, objects, inheritance, and polymorphism",
       isCompleted: false,
-      durationMinutes: 90,
+      challenge_id: '',
     ),
   ];
 
@@ -84,7 +83,6 @@ class _ChallengeDetailScreenState extends State<ChallengeDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _isJoined = widget.challenge.progress != null;
   }
 
   @override
@@ -276,7 +274,7 @@ class _ChallengeDetailScreenState extends State<ChallengeDetailScreen> {
               _buildInfoItem(
                 icon: Icons.people_outline,
                 title: "Participants",
-                value: "${widget.challenge.participants} people",
+                value: "${widget.challenge.participants.length} people",
               ),
             ],
           ),
@@ -295,59 +293,6 @@ class _ChallengeDetailScreenState extends State<ChallengeDetailScreen> {
               ),
             ],
           ),
-          if (widget.challenge.progress != null) ...[
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                CircularPercentIndicator(
-                  radius: 45.0,
-                  lineWidth: 8.0,
-                  animation: true,
-                  percent: widget.challenge.progress ?? 0.0,
-                  center: Text(
-                    '${((widget.challenge.progress ?? 0) * 100).round()}%',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18.0,
-                      color: _getChallengeColor(),
-                    ),
-                  ),
-                  circularStrokeCap: CircularStrokeCap.round,
-                  progressColor: _getChallengeColor(),
-                  backgroundColor: _getChallengeColor().withValues(alpha: 0.2),
-                ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Your Progress",
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        "You've completed ${widget.challenge.daysCompleted} out of ${widget.challenge.estimatedTime.split(' ')[0]} days",
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      LinearProgressIndicator(
-                        value: widget.challenge.progress ?? 0.0,
-                        backgroundColor: Colors.grey[200],
-                        valueColor: AlwaysStoppedAnimation<Color>(_getChallengeColor()),
-                        minHeight: 8,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
         ],
       ),
     );
@@ -500,7 +445,7 @@ class _ChallengeDetailScreenState extends State<ChallengeDetailScreen> {
                   child: task.isCompleted
                       ? const Icon(Icons.check, color: Colors.white)
                       : Text(
-                          '${task.day}',
+                          '${task.index}',
                           style: TextStyle(
                             color: task.isCompleted ? Colors.white : Colors.grey[600],
                             fontWeight: FontWeight.bold,
@@ -525,25 +470,7 @@ class _ChallengeDetailScreenState extends State<ChallengeDetailScreen> {
                         color: Colors.grey[600],
                         fontSize: 13,
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.timer_outlined,
-                          size: 14,
-                          color: Colors.grey[500],
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${task.durationMinutes} mins',
-                          style: TextStyle(
-                            color: Colors.grey[500],
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
+                    )
                   ],
                 ),
                 trailing: task.isCompleted

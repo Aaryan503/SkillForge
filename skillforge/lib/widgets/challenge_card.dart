@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/challenge_model.dart';
 import '../screens/challenge_detail_screen.dart';
-import '../providers/challenge_provider.dart';
 
 class ChallengeCard extends ConsumerWidget {
   final Challenge challenge;
@@ -79,7 +78,7 @@ class ChallengeCard extends ConsumerWidget {
                 children: [
                   Icon(Icons.people, size: 16, color: Colors.grey[600]),
                   const SizedBox(width: 4),
-                  Text('${challenge.participants} joined'),
+                  Text('${challenge.participants.length} joined'),
                   const SizedBox(width: 16),
                   Icon(Icons.star, size: 16, color: Colors.grey[600]),
                   const SizedBox(width: 4),
@@ -101,7 +100,7 @@ class ChallengeCard extends ConsumerWidget {
                 alignment: Alignment.centerRight,
                 child: ElevatedButton(
                   onPressed: () {
-                    ref.read(challengeProvider.notifier).joinChallenge(challenge.id);
+                    // ref.read(challengeProvider.notifier).joinChallenge(challenge.id);
                   },
                   child: const Text('Join'),
                 ),

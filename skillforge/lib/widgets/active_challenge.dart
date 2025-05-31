@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../models/challenge_model.dart';
 import '../screens/challenge_detail_screen.dart';
 
@@ -67,8 +66,6 @@ class ActiveChallengeCard extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             child: Row(
               children: [
-                _buildProgressIndicator(),
-                const SizedBox(width: 16),
                 Expanded(child: _buildChallengeInfo()),
                 _buildPlayButton(),
               ],
@@ -76,26 +73,6 @@ class ActiveChallengeCard extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildProgressIndicator() {
-    return CircularPercentIndicator(
-      radius: 30.0,
-      lineWidth: 6.0,
-      animation: true,
-      percent: challenge.progress ?? 0.0,
-      center: Text(
-        '${((challenge.progress ?? 0) * 100).round()}%',
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 14.0,
-          color: Colors.white,
-        ),
-      ),
-      circularStrokeCap: CircularStrokeCap.round,
-      progressColor: Colors.white,
-      backgroundColor: Colors.white.withValues(alpha: 0.3),
     );
   }
 
@@ -109,14 +86,6 @@ class ActiveChallengeCard extends StatelessWidget {
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.white,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Day ${challenge.daysCompleted}/${challenge.estimatedTime.split(' ')[0]}',
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.white.withValues(alpha: 0.9),
           ),
         ),
         const SizedBox(height: 8),
