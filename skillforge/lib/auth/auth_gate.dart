@@ -1,25 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skillforge/screens/auth_screen.dart';
 import 'package:skillforge/screens/home_screen.dart';
-import 'package:skillforge/providers/user_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class AuthGate extends ConsumerStatefulWidget {
+class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
 
   @override
-  ConsumerState<AuthGate> createState() => _AuthGateState();
+  State<AuthGate> createState() => _AuthGateState();
 }
 
-class _AuthGateState extends ConsumerState<AuthGate> {
+class _AuthGateState extends State<AuthGate> {
   bool _isInitializing = true;
 
   @override
   void initState() {
     super.initState();
     _checkInitialSession();
-    _listenToAuthChanges();
   }
 
   Future<void> _checkInitialSession() async {
@@ -32,20 +29,11 @@ class _AuthGateState extends ConsumerState<AuthGate> {
     }
   }
 
-  void _listenToAuthChanges() {
-    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
-      final session = data.session;
-      ref.read(userProvider.notifier).updateUserFromSession(session);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     if (_isInitializing) {
       return _buildSplashScreen();
     }
-
-    final isAuthenticated = ref.watch(userProvider).isAuthenticated;
 
     return StreamBuilder<AuthState>(
       stream: Supabase.instance.client.auth.onAuthStateChange,
@@ -56,14 +44,27 @@ class _AuthGateState extends ConsumerState<AuthGate> {
         if (snapshot.hasError) {
           return _buildErrorScreen(snapshot.error.toString());
         }
+        final session = _getCurrentSession(snapshot);
 
-        if (isAuthenticated) {
+        if (session != null && session.accessToken.isNotEmpty) {
           return const HomeScreen();
         } else {
           return const AuthScreen();
         }
       },
     );
+  }
+
+  Session? _getCurrentSession(AsyncSnapshot<AuthState> snapshot) {
+    try {
+      if (snapshot.hasData && snapshot.data != null) {
+        return snapshot.data!.session;
+      }
+      return Supabase.instance.client.auth.currentSession;
+    } catch (e) {
+      debugPrint('Error getting session: $e');
+      return null;
+    }
   }
 
   Widget _buildSplashScreen() {
