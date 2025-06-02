@@ -7,7 +7,7 @@ import '../models/checkpoint_model.dart';
 import '../providers/user_provider.dart';
 
 class CreateCheckpointsScreen extends ConsumerStatefulWidget {
-  final String challengeId;
+  final int challengeId;
   final String challengeTitle;
 
   const CreateCheckpointsScreen({
@@ -48,6 +48,10 @@ class _CreateCheckpointsScreenState extends ConsumerState<CreateCheckpointsScree
         backgroundColor: Theme.of(context).colorScheme.surface,
         foregroundColor: Theme.of(context).colorScheme.primary,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => _showExitConfirmation(),
+        ),
         title: Text(
           'Add Checkpoints',
           style: GoogleFonts.poppins(
@@ -55,10 +59,6 @@ class _CreateCheckpointsScreenState extends ConsumerState<CreateCheckpointsScree
             fontWeight: FontWeight.w600,
             color: Theme.of(context).colorScheme.primary,
           ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => _showExitConfirmation(),
         ),
       ),
       body: Form(
@@ -68,15 +68,14 @@ class _CreateCheckpointsScreenState extends ConsumerState<CreateCheckpointsScree
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Challenge Info Header
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
                   ),
                 ),
                 child: Column(
@@ -102,8 +101,6 @@ class _CreateCheckpointsScreenState extends ConsumerState<CreateCheckpointsScree
                 ),
               ),
               const SizedBox(height: 24),
-              
-              // Current Checkpoint Header
               Row(
                 children: [
                   Container(
@@ -152,8 +149,6 @@ class _CreateCheckpointsScreenState extends ConsumerState<CreateCheckpointsScree
                 ],
               ),
               const SizedBox(height: 32),
-              
-              // Title Field
               Text(
                 'Checkpoint Title',
                 style: GoogleFonts.poppins(
@@ -189,8 +184,6 @@ class _CreateCheckpointsScreenState extends ConsumerState<CreateCheckpointsScree
                 },
               ),
               const SizedBox(height: 24),
-              
-              // Description Field
               Text(
                 'Checkpoint Description',
                 style: GoogleFonts.poppins(
@@ -227,8 +220,6 @@ class _CreateCheckpointsScreenState extends ConsumerState<CreateCheckpointsScree
                 },
               ),
               const SizedBox(height: 32),
-              
-              // Preview Card
               if (_titleController.text.isNotEmpty || _descriptionController.text.isNotEmpty)
                 Card(
                   elevation: 2,
@@ -307,8 +298,6 @@ class _CreateCheckpointsScreenState extends ConsumerState<CreateCheckpointsScree
                   ),
                 ),
               const SizedBox(height: 40),
-              
-              // Created Checkpoints List
               if (_createdCheckpoints.isNotEmpty) ...[
                 Text(
                   'Created Checkpoints',
@@ -391,7 +380,7 @@ class _CreateCheckpointsScreenState extends ConsumerState<CreateCheckpointsScree
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withValues(alpha: .1),
               spreadRadius: 1,
               blurRadius: 10,
               offset: const Offset(0, -2),
@@ -459,29 +448,26 @@ class _CreateCheckpointsScreenState extends ConsumerState<CreateCheckpointsScree
     }
 
     final currentUser = ref.read(userProvider);
-    if (currentUser == null || !currentUser.isAuthenticated) {
+    if (!currentUser.isAuthenticated) {
       throw Exception('User not authenticated');
     }
 
-    // Create checkpoint object
     final checkpoint = Checkpoint(
       index: _currentCheckpointIndex,
       title: _titleController.text.trim(),
       description: _descriptionController.text.trim(),
-      challenge_id: widget.challengeId,
+      challenge_id: widget.challengeId.toString(),
       completedBy: [],
     );
 
-    // Save to Supabase
     await _supabase.from('checkpoint_table').insert({
       'index': checkpoint.index,
       'title': checkpoint.title,
       'description': checkpoint.description,
       'challenge_id': checkpoint.challenge_id,
-      'completed_by': [], // Store as empty array
+      'completed_by': [],
     });
 
-    // Add to local list
     _createdCheckpoints.add(checkpoint);
   }
 
@@ -493,7 +479,6 @@ class _CreateCheckpointsScreenState extends ConsumerState<CreateCheckpointsScree
     try {
       await _saveCurrentCheckpoint();
 
-      // Clear form and increment index
       _titleController.clear();
       _descriptionController.clear();
       _currentCheckpointIndex++;
@@ -502,7 +487,6 @@ class _CreateCheckpointsScreenState extends ConsumerState<CreateCheckpointsScree
         _isSaving = false;
       });
 
-      // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Checkpoint ${_currentCheckpointIndex - 1} saved successfully!'),
@@ -530,14 +514,12 @@ class _CreateCheckpointsScreenState extends ConsumerState<CreateCheckpointsScree
     });
 
     try {
-      // Save current checkpoint if form has content
       if (_titleController.text.trim().isNotEmpty || 
           _descriptionController.text.trim().isNotEmpty) {
         await _saveCurrentCheckpoint();
       }
 
       if (mounted) {
-        // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('All checkpoints saved! Challenge "${widget.challengeTitle}" is ready.'),
@@ -546,7 +528,6 @@ class _CreateCheckpointsScreenState extends ConsumerState<CreateCheckpointsScree
           ),
         );
 
-        // Navigate to HomeScreen - replace with your actual home screen route
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) => HomeScreen()
@@ -586,8 +567,8 @@ class _CreateCheckpointsScreenState extends ConsumerState<CreateCheckpointsScree
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close dialog
-                Navigator.of(context).pop(); // Exit screen
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
               },
               style: TextButton.styleFrom(
                 foregroundColor: Colors.red,

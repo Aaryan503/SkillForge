@@ -43,7 +43,6 @@ class UserNotifier extends StateNotifier<User> {
     if (currentSession?.user != null) {
       await _updateUserFromSession(currentSession);
     } else {
-      print("HELLOOOOOOO 2");
       state = User();
     }
   }
@@ -89,7 +88,6 @@ class UserNotifier extends StateNotifier<User> {
         isAuthenticated: true,
       );
     } catch (_) {
-      print("HELLLOOOOOOO");
       state = User(
         userId: session!.user.id,
         email: session.user.email,
@@ -104,7 +102,7 @@ class UserNotifier extends StateNotifier<User> {
     if (response.user == null) {
       throw Exception('Login failed: No user returned');
     }
-    // Auth listener will update state
+    await _updateUserFromSession(response.session);
   }
 
   Future<void> signUp(String email, String password, String username) async {
@@ -117,12 +115,12 @@ class UserNotifier extends StateNotifier<User> {
       'email': email,
       'username': username,
     });
-    // Auth listener will update state
+    await _updateUserFromSession(response.session);
   }
 
   Future<void> signOut() async {
     await _authService.signOut();
-    // Auth listener will update state
+    state = User();
   }
 
   @override

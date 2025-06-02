@@ -8,6 +8,7 @@ import '../models/challenge_model.dart';
 import '../providers/checkpoint_provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/challenge_provider.dart';
+import 'checkpoint_detail_screen.dart';
 
 class ChallengeDetailScreen extends ConsumerStatefulWidget {
   final Challenge challenge;
@@ -34,10 +35,6 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
 
   @override
   void dispose() {
-    // Only access ref if mounted
-    if (mounted) {
-      // ref.read(checkpointProvider.notifier).clearCheckpoints();
-    }
     super.dispose();
   }
 
@@ -51,8 +48,6 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
       orElse: () => widget.challenge,
     );
     final isParticipant = userId != null && challenge.participants.contains(userId);
-    final completionPercentage = ref.watch(challengeCompletionProvider(widget.challenge.id));
-    
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: CustomScrollView(
@@ -61,20 +56,20 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
             expandedHeight: 200.0,
             floating: false,
             pinned: true,
-            backgroundColor: _getChallengeColor(),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
             flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                widget.challenge.title,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              ),
               background: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      _getChallengeColor(),
-                      _getChallengeColor().withValues(alpha: 0.8),
+                      Theme.of(context).colorScheme.primary,
+                      Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
                     ],
                   ),
                 ),
@@ -97,76 +92,61 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
                         ),
                       ),
                     ),
-                    // Progress indicator overlay
-                    if (completionPercentage > 0)
-                      Positioned(
-                        bottom: 20,
-                        left: 20,
-                        right: 20,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "${(completionPercentage * 100).toInt()}% Complete",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            LinearProgressIndicator(
-                              value: completionPercentage,
-                              backgroundColor: Colors.white.withOpacity(0.3),
-                              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                              minHeight: 4,
-                            ),
-                          ],
+                    Positioned(
+                      left: 20,
+                      right: 20,
+                      bottom: 20,
+                      child: Text(
+                        widget.challenge.title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 24,
+                          overflow: TextOverflow.ellipsis,
                         ),
+                        maxLines: 2,
                       ),
+                    ),
                   ],
                 ),
               ),
             ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.share_outlined, color: Colors.white),
-                onPressed: () {/* TODO: add share */},
-              ),
-              IconButton(
-                icon: const Icon(Icons.bookmark_border, color: Colors.white),
-                onPressed: () {/* TODO: add bookmark */},
-              ),
-            ],
           ),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ChallengeHeaderWidget(
                     challenge: widget.challenge,
-                    challengeColor: _getChallengeColor(),
+                    challengeColor: Theme.of(context).colorScheme.primary,
                     difficultyColor: _getDifficultyColor(),
                     difficultyText: _getDifficultyText(),
                   ),
                   const SizedBox(height: 24),
                   ChallengeInfoWidget(
                     challenge: widget.challenge,
-                    challengeColor: _getChallengeColor(),
+                    challengeColor: Theme.of(context).colorScheme.primary,
                   ),
                   const SizedBox(height: 24),
                   ChallengeTabBarWidget(
                     selectedTabIndex: _selectedTabIndex,
-                    challengeColor: _getChallengeColor(),
+                    challengeColor: Theme.of(context).colorScheme.primary,
                     onTabSelected: (index) => setState(() => _selectedTabIndex = index),
                   ),
                   const SizedBox(height: 20),
-                  ChallengeTabContentWidget(
-                    selectedTabIndex: _selectedTabIndex,
-                    challenge: widget.challenge,
-                    challengeColor: _getChallengeColor(),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: 200,
+                      maxHeight: MediaQuery.of(context).size.height * 0.6,
+                    ),
+                    child: ChallengeTabContentWidget(
+                      selectedTabIndex: _selectedTabIndex,
+                      challenge: widget.challenge,
+                      challengeColor: Theme.of(context).colorScheme.primary,
+                    ),
                   ),
                 ],
               ),
@@ -206,7 +186,7 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
               icon: Icon((isParticipant && userId != null) ? Icons.play_arrow : Icons.add),
               label: Text(_getButtonText(checkpointState, userId, isParticipant)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _getChallengeColor(),
+                backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
@@ -232,11 +212,13 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
     final nextCheckpoint = ref.read(checkpointProvider.notifier).getNextCheckpointForUser(userId);
 
     if (nextCheckpoint != null) {
-      setState(() => _selectedTabIndex = 1); // Assuming checkpoints is the second tab
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Continue with "${nextCheckpoint.title}"'),
-          backgroundColor: _getChallengeColor(),
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => CheckpointDetailScreen(
+            checkpoint: nextCheckpoint,
+            challenge: widget.challenge,
+            challengeColor: Theme.of(context).colorScheme.primary,
+          ),
         ),
       );
     } else {
@@ -246,19 +228,6 @@ class _ChallengeDetailScreenState extends ConsumerState<ChallengeDetailScreen> {
           backgroundColor: Colors.green,
         ),
       );
-    }
-  }
-
-  Color _getChallengeColor() {
-    switch (widget.challenge.language.toLowerCase()) {
-      case 'python':
-        return Colors.blue;
-      case 'dart':
-        return Colors.teal;
-      case 'javascript':
-        return Colors.amber;
-      default:
-        return Theme.of(context).colorScheme.primary;
     }
   }
 

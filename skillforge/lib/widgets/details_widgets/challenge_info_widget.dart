@@ -31,7 +31,6 @@ class _ChallengeInfoWidgetState extends State<ChallengeInfoWidget> {
       _loading = true;
     });
     try {
-      // First, get the creator's email from the users table using the id
       final userRow = await Supabase.instance.client
           .from('users')
           .select('username,email')
@@ -40,7 +39,6 @@ class _ChallengeInfoWidgetState extends State<ChallengeInfoWidget> {
 
       String? username;
       if (userRow != null && userRow['email'] != null) {
-        // Now fetch username by email (redundant if already fetched, but as per prompt)
         final usernameRow = await Supabase.instance.client
             .from('users')
             .select('username')
@@ -79,7 +77,6 @@ class _ChallengeInfoWidgetState extends State<ChallengeInfoWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Participants
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -102,10 +99,8 @@ class _ChallengeInfoWidgetState extends State<ChallengeInfoWidget> {
             ],
           ),
           const SizedBox(height: 16),
-          // Created by & Completion Rate
           Row(
             children: [
-              // Created by
               Icon(Icons.person_outline, color: widget.challengeColor, size: 20),
               const SizedBox(width: 12),
               Column(

@@ -21,16 +21,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
   final _signupEmailController = TextEditingController();
   final _signupPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  final _signupUsernameController = TextEditingController(); // <-- Add this
+  final _signupUsernameController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
-      setState(() {
-        // This triggers a rebuild when tab changes
-      });
+      setState(() {});
     });
   }
 
@@ -126,7 +124,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                   ),
                 ),
                 const SizedBox(height: 32),
-                // Use IndexedStack instead of TabBarView to avoid height constraints
                 IndexedStack(
                   index: _tabController.index,
                   children: [
@@ -335,11 +332,36 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
           ),
         );
       }
-    } catch (e) {
+    } on dynamic catch (e) {
+      String errorMsg = 'Login failed. Please try again.';
+      if (e is Exception && e.toString().contains('Invalid login credentials')) {
+        errorMsg = 'Incorrect email or password.';
+      } else if (e is Exception && e.toString().contains('User not found')) {
+        errorMsg = 'No account found for this email.';
+      } else if (e is Exception && e.toString().contains('Invalid email')) {
+        errorMsg = 'Invalid email address.';
+      } else if (e is Exception && e.toString().contains('network')) {
+        errorMsg = 'Network error. Please check your connection.';
+      } else if (e is Exception && e.toString().contains('password')) {
+        errorMsg = 'Incorrect password.';
+      } else if (e is Exception && e.toString().contains('Sign in failed')) {
+        errorMsg = 'Sign in failed. Please try again.';
+      } else if (e is Exception && e.toString().contains('Login failed')) {
+        errorMsg = 'Login failed. Please check your credentials.';
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Login failed: ${e.toString()}'),
+            content: Text(errorMsg),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('An unexpected error occurred. Please try again.'),
             backgroundColor: Colors.red,
           ),
         );
@@ -386,11 +408,32 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
           ),
         );
       }
-    } catch (e) {
+    } on dynamic catch (e) {
+      String errorMsg = 'Sign up failed. Please try again.';
+      if (e is Exception && e.toString().contains('User already registered')) {
+        errorMsg = 'An account already exists for this email.';
+      } else if (e is Exception && e.toString().contains('Invalid email')) {
+        errorMsg = 'Invalid email address.';
+      } else if (e is Exception && e.toString().contains('Password should be at least')) {
+        errorMsg = 'Password is too weak.';
+      } else if (e is Exception && e.toString().contains('network')) {
+        errorMsg = 'Network error. Please check your connection.';
+      } else if (e is Exception && e.toString().contains('Sign up failed')) {
+        errorMsg = 'Sign up failed. Please try again.';
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Sign up failed: ${e.toString()}'),
+            content: Text(errorMsg),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('An unexpected error occurred. Please try again.'),
             backgroundColor: Colors.red,
           ),
         );

@@ -14,18 +14,24 @@ class ChallengeCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final Color challengeColor = _getChallengeColor(context);
+    final Color challengeColor = Theme.of(context).primaryColor;
+    final challengeState = ref.watch(challengeProvider);
+    final actualChallenge = challengeState.allChallenges.firstWhere(
+      (c) => c.id == challenge.id,
+      orElse: () => challenge,
+    );
+    final difficultyText = actualChallenge.difficulty.name[0].toUpperCase() + actualChallenge.difficulty.name.substring(1);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
         onTap: () {
-            Navigator.of(context).push(
-    MaterialPageRoute(
-      builder: (context) => ChallengeDetailScreen(challenge: challenge),
-    ),
-  );
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => ChallengeDetailScreen(challenge: challenge),
+            ),
+          );
         },
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -38,7 +44,7 @@ class ChallengeCard extends ConsumerWidget {
                     width: 50,
                     height: 50,
                     decoration: BoxDecoration(
-                      color: challengeColor.withOpacity(0.1),
+                      color: challengeColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(
@@ -82,7 +88,7 @@ class ChallengeCard extends ConsumerWidget {
                   const SizedBox(width: 16),
                   Icon(Icons.star, size: 16, color: Colors.grey[600]),
                   const SizedBox(width: 4),
-                  Text(' difficulty'),
+                  Text(difficultyText),
                 ],
               ),
               const SizedBox(height: 12),
@@ -112,16 +118,4 @@ class ChallengeCard extends ConsumerWidget {
     );
   }
 
-  Color _getChallengeColor(BuildContext context) {
-    switch (challenge.language.toLowerCase()) {
-      case 'flutter':
-        return Colors.blue;
-      case 'python':
-        return Colors.green;
-      case 'javascript':
-        return Colors.amber;
-      default:
-        return Theme.of(context).primaryColor;
-    }
-  }
 }

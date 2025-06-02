@@ -3,7 +3,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/checkpoint_model.dart';
 import 'user_provider.dart';
 
-// Checkpoint state class
 class CheckpointState {
   final List<Checkpoint> checkpoints;
   final bool isLoading;
@@ -28,23 +27,19 @@ class CheckpointState {
   }
 }
 
-// Checkpoint provider
 class CheckpointNotifier extends StateNotifier<CheckpointState> {
   CheckpointNotifier() : super(CheckpointState());
 
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  // Load checkpoints for a specific challenge
-  Future<void> loadCheckpoints(String challengeId) async {
-    if (challengeId.isEmpty) return;
-
+  Future<void> loadCheckpoints(int challengeId) async {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
       final response = await _supabase
           .from('checkpoint_table')
           .select('*')
-          .eq('challenge_id', challengeId)
+          .eq('challenge_id', challengeId.toString())
           .order('index', ascending: true);
 
       final List<Checkpoint> checkpoints = (response as List)
@@ -69,13 +64,11 @@ class CheckpointNotifier extends StateNotifier<CheckpointState> {
     }
   }
 
-  // Update checkpoint completion for a user
   Future<void> updateCheckpointCompletion(
-      String challengeId, int index, String userId, bool markCompleted) async {
+      int challengeId, int index, String userId, bool markCompleted) async {
     try {
-      // Fetch the checkpoint
       final checkpoint = state.checkpoints.firstWhere(
-        (c) => c.challenge_id == challengeId && c.index == index,
+        (c) => c.challenge_id == challengeId.toString() && c.index == index,
         orElse: () => throw Exception('Checkpoint not found'),
       );
 
@@ -88,16 +81,14 @@ class CheckpointNotifier extends StateNotifier<CheckpointState> {
         updatedCompletedBy.remove(userId);
       }
 
-      // Update in Supabase
       await _supabase
           .from('checkpoint_table')
           .update({'completed_by': updatedCompletedBy})
-          .eq('challenge_id', challengeId)
+          .eq('challenge_id', challengeId.toString())
           .eq('index', index);
 
-      // Update local state
       final updatedCheckpoints = state.checkpoints.map((c) {
-        if (c.challenge_id == challengeId && c.index == index) {
+        if (c.challenge_id == challengeId.toString() && c.index == index) {
           return Checkpoint(
             index: c.index,
             title: c.title,
@@ -117,19 +108,16 @@ class CheckpointNotifier extends StateNotifier<CheckpointState> {
     }
   }
 
-  // Clear checkpoints when switching challenges
   void clearCheckpoints() {
     state = CheckpointState();
   }
 
-  // Get completion percentage for a user
   double getCompletionPercentage(String userId) {
     if (state.checkpoints.isEmpty) return 0.0;
     final completedCount = state.checkpoints.where((c) => c.completedBy.contains(userId)).length;
     return completedCount / state.checkpoints.length;
   }
 
-  // Get next incomplete checkpoint for a user
   Checkpoint? getNextCheckpointForUser(String userId) {
     return state.checkpoints.cast<Checkpoint?>().firstWhere(
       (checkpoint) => checkpoint != null && !checkpoint.completedBy.contains(userId),
@@ -140,29 +128,24 @@ class CheckpointNotifier extends StateNotifier<CheckpointState> {
   List<String> _parseCompletedBy(dynamic completedByRaw) {
     if (completedByRaw == null) return [];
     if (completedByRaw is List) {
-      // Defensive: convert all to string
       return completedByRaw.map((e) => e.toString()).toList();
     }
-    // If it's a single value (int, bool, etc.), return as string in a list
     return [completedByRaw.toString()];
   }
 }
 
-// Provider instances
 final checkpointProvider = StateNotifierProvider<CheckpointNotifier, CheckpointState>((ref) {
   return CheckpointNotifier();
 });
 
-// Provider for checkpoints of a specific challenge
-final challengeCheckpointsProvider = Provider.family<List<Checkpoint>, String>((ref, challengeId) {
+final challengeCheckpointsProvider = Provider.family<List<Checkpoint>, int>((ref, challengeId) {
   final checkpointState = ref.watch(checkpointProvider);
   return checkpointState.checkpoints
-      .where((checkpoint) => checkpoint.challenge_id == challengeId)
+      .where((checkpoint) => checkpoint.challenge_id == challengeId.toString())
       .toList();
 });
 
-// Provider for completion percentage of a specific challenge for the current user
-final challengeCompletionProvider = Provider.family<double, String>((ref, challengeId) {
+final challengeCompletionProvider = Provider.family<double, int>((ref, challengeId) {
   final checkpoints = ref.watch(challengeCheckpointsProvider(challengeId));
   final userId = ref.watch(userProvider).userId;
   if (checkpoints.isEmpty || userId == null) return 0.0;

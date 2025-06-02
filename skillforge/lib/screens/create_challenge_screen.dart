@@ -17,27 +17,57 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _languageController = TextEditingController();
   
   ChallengeDifficulty? _selectedDifficulty;
+  String? _selectedLanguage;
   List<String> _selectedTags = [];
   bool _isCreating = false;
+  bool _hasAttemptedSubmit = false;
 
-  // Randomly generated list of tags
+  final List<String> _programmingLanguages = [
+    'JavaScript',
+    'Python',
+    'Java',
+    'TypeScript',
+    'C#',
+    'C++',
+    'PHP',
+    'Swift',
+    'Kotlin',
+    'Rust',
+    'Go',
+    'Ruby',
+    'Dart',
+    'Scala',
+    'R',
+    'MATLAB',
+    'Perl',
+    'Objective-C',
+    'Visual Basic',
+    'Assembly',
+    'SQL',
+    'HTML/CSS',
+    'Shell/Bash',
+    'PowerShell',
+    'Lua',
+    'Haskell',
+    'Clojure',
+    'Erlang',
+    'F#',
+    'Groovy'
+  ];
+
   final List<String> _availableTags = [
-    'Programming', 'Design', 'Marketing', 'Fitness', 'Learning',
-    'Creative', 'Business', 'Technology', 'Health', 'Personal Development',
-    'Writing', 'Art', 'Music', 'Photography', 'Cooking', 'Reading',
-    'Meditation', 'Finance', 'Leadership', 'Communication', 'Productivity',
-    'Gaming', 'Sports', 'Travel', 'Fashion', 'Environment', 'Science',
-    'History', 'Languages', 'DIY', 'Social Media', 'Networking'
+    'Machine Learning','Web Development','Mobile Development',
+    'Game Development','Data Science','Blockchain','Cybersecurity',
+    'Cloud Computing','DevOps','Artificial Intelligence',
+    'Internet of Things (IoT)','Augmented Reality (AR)','Virtual Reality (VR)',
   ];
 
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
-    _languageController.dispose();
     super.dispose();
   }
 
@@ -77,16 +107,7 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                   color: Theme.of(context).colorScheme.primary,
                 ),
               ),
-              Text(
-                'Fill in the basic information about your challenge',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
-                ),
-              ),
               const SizedBox(height: 32),
-              
-              // Title Field
               Text(
                 'Challenge Title',
                 style: GoogleFonts.poppins(
@@ -98,9 +119,6 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
               const SizedBox(height: 8),
               TextFormField(
                 controller: _titleController,
-                decoration: const InputDecoration(
-                  hintText: 'Enter a compelling title for your challenge',
-                ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Please enter a title';
@@ -109,8 +127,6 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                 },
               ),
               const SizedBox(height: 24),
-              
-              // Description Field
               Text(
                 'Description',
                 style: GoogleFonts.poppins(
@@ -123,9 +139,6 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
               TextFormField(
                 controller: _descriptionController,
                 maxLines: 4,
-                decoration: const InputDecoration(
-                  hintText: 'Describe what participants will do and learn',
-                ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Please enter a description';
@@ -134,10 +147,8 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                 },
               ),
               const SizedBox(height: 24),
-              
-              // Language Field
               Text(
-                'Language',
+                'Programming Language',
                 style: GoogleFonts.poppins(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -145,21 +156,43 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              TextFormField(
-                controller: _languageController,
-                decoration: const InputDecoration(
-                  hintText: 'e.g., English, Spanish, French',
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a language';
-                  }
-                  return null;
-                },
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _selectedLanguage,
+                    hint: const Text('Select programming language'),
+                    icon: const Icon(Icons.keyboard_arrow_down),
+                    isExpanded: true,
+                    items: _programmingLanguages.map((language) {
+                      return DropdownMenuItem(
+                        value: language,
+                        child: Text(language),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedLanguage = value;
+                      });
+                    },
+                  ),
+                ),
               ),
+              const SizedBox(height: 8),
+              if (_selectedLanguage == null && _hasAttemptedSubmit)
+                Text(
+                  'Please select a programming language',
+                  style: TextStyle(
+                    color: Colors.red[700],
+                    fontSize: 12,
+                  ),
+                ),
               const SizedBox(height: 24),
-              
-              // Difficulty Dropdown
               Text(
                 'Difficulty Level',
                 style: GoogleFonts.poppins(
@@ -193,8 +226,6 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                 },
               ),
               const SizedBox(height: 24),
-              
-              // Tags Dropdown
               Text(
                 'Tags',
                 style: GoogleFonts.poppins(
@@ -233,8 +264,6 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              
-              // Selected Tags Display
               if (_selectedTags.isNotEmpty)
                 Wrap(
                   spacing: 8,
@@ -276,8 +305,6 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                   }).toList(),
                 ),
               const SizedBox(height: 32),
-              
-              // Preview Card
               if (_titleController.text.isNotEmpty || _descriptionController.text.isNotEmpty)
                 Card(
                   child: Padding(
@@ -314,11 +341,29 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                         const SizedBox(height: 12),
                         Row(
                           children: [
+                            if (_selectedLanguage != null)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  _selectedLanguage!,
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.secondary,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            if (_selectedLanguage != null && _selectedDifficulty != null)
+                              const SizedBox(width: 8),
                             if (_selectedDifficulty != null)
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.tertiary.withOpacity(0.2),
+                                  color: Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
@@ -330,7 +375,7 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                                   ),
                                 ),
                               ),
-                            if (_selectedDifficulty != null && _selectedTags.isNotEmpty)
+                            if ((_selectedLanguage != null || _selectedDifficulty != null) && _selectedTags.isNotEmpty)
                               const SizedBox(width: 8),
                             if (_selectedTags.isNotEmpty)
                               Text(
@@ -357,7 +402,7 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withValues(alpha: 0.1),
               spreadRadius: 1,
               blurRadius: 10,
               offset: const Offset(0, -2),
@@ -387,7 +432,21 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
   }
 
   void _createChallenge() async {
+    setState(() {
+      _hasAttemptedSubmit = true;
+    });
+
     if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    if (_selectedLanguage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a programming language'),
+          backgroundColor: Colors.orange,
+        ),
+      );
       return;
     }
 
@@ -406,31 +465,23 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
     });
 
     try {
-      // Get current user ID from userProvider
       final currentUser = ref.read(userProvider);
-      if (currentUser == null) {
-        throw Exception('User not authenticated');
-      }
 
-      // Create challenge object
       final challenge = Challenge(
-        id: '', // Will be generated by backend
+        id: 0,
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
-        language: _languageController.text.trim(),
-        createdBy: currentUser.userId!, // From userProvider
-        participants: [currentUser.userId!], // Creator is automatically a participant
+        language: _selectedLanguage!,
+        createdBy: currentUser.userId!,
+        participants: [currentUser.userId!],
         difficulty: _selectedDifficulty!,
         tags: _selectedTags,
       );
 
-      // Create challenge through provider
       final createdChallenge = await ref.read(challengeProvider.notifier).createChallenge(challenge);
 
-      // Navigate to checkpoint creation screen
       if (mounted) {
         Navigator.of(context).pop();
-        // Navigate to checkpoint creation screen (you'll implement this)
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(

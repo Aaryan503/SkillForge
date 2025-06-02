@@ -46,16 +46,14 @@ class ChallengeNotifier extends StateNotifier<ChallengeState> {
     try {
       state = state.copyWith(isLoading: true);
 
-      // Fetch all challenges from Supabase
       final response = await _supabase
           .from('challenge_table')
           .select()
           .order('created_at', ascending: false);
 
-      // Convert response to Challenge objects
       final challenges = (response as List).map((challengeData) {
         return Challenge(
-          id: challengeData['id'].toString(),
+          id: challengeData['id'] as int,
           title: challengeData['title'] ?? '',
           description: challengeData['description'] ?? '',
           language: challengeData['language'] ?? '',
@@ -69,11 +67,7 @@ class ChallengeNotifier extends StateNotifier<ChallengeState> {
         );
       }).toList();
 
-      // For now, we'll consider challenges where the user is a participant as "active"
-      // You can modify this logic based on your app's requirements
       final activeChallenges = challenges.where((challenge) {
-        // This is a placeholder - you might want to filter based on user participation
-        // or other criteria for what makes a challenge "active"
         return challenge.participants.isNotEmpty;
       }).toList();
 
@@ -95,7 +89,6 @@ class ChallengeNotifier extends StateNotifier<ChallengeState> {
     try {
       state = state.copyWith(isLoading: true);
 
-      // Insert challenge into Supabase
       final response = await _supabase
           .from('challenge_table')
           .insert({
@@ -110,9 +103,8 @@ class ChallengeNotifier extends StateNotifier<ChallengeState> {
           .select()
           .single();
 
-      // Create Challenge object from response
       final createdChallenge = Challenge(
-        id: response['id'].toString(),
+        id: response['id'] as int,
         title: response['title'],
         description: response['description'],
         language: response['language'],
@@ -125,7 +117,6 @@ class ChallengeNotifier extends StateNotifier<ChallengeState> {
         tags: List<String>.from(response['tags'] ?? []),
       );
 
-      // Update local state
       final updatedAllChallenges = [...state.allChallenges, createdChallenge];
       final updatedActiveChallenges = [...state.activeChallenges, createdChallenge];
 
@@ -145,21 +136,18 @@ class ChallengeNotifier extends StateNotifier<ChallengeState> {
     }
   }
 
-  Future<void> joinChallenge(String challengeId, String userId) async {
+  Future<void> joinChallenge(int challengeId, String userId) async {
     try {
-      // Find the challenge
       final challenge = state.allChallenges.firstWhere((c) => c.id == challengeId);
       if (challenge.participants.contains(userId)) return;
 
       final updatedParticipants = [...challenge.participants, userId];
 
-      // Update in Supabase
       await _supabase
           .from('challenge_table')
           .update({'participants': updatedParticipants})
           .eq('id', challengeId);
 
-      // Update local state
       final updatedChallenge = Challenge(
         id: challenge.id,
         title: challenge.title,
@@ -191,12 +179,10 @@ class ChallengeNotifier extends StateNotifier<ChallengeState> {
     }
   }
 
-  // Method to refresh challenges from database
   Future<void> refreshChallenges() async {
     await _loadChallenges();
   }
 
-  // Method to load active challenges for a specific user
   Future<void> loadActiveChallengesForUser(String userId) async {
     try {
       final activeChallenges = state.allChallenges.where((challenge) {
@@ -232,13 +218,11 @@ final newChallengesProvider = Provider<List<Challenge>>((ref) {
   return challengeState.allChallenges.take(2).toList();
 });
 
-// Provider that watches for user changes and loads their active challenges
 final userActiveChallengesProvider = Provider<List<Challenge>>((ref) {
   final challengeState = ref.watch(challengeProvider);
   final user = ref.watch(userProvider);
   
   if (user.isAuthenticated && user.userId != null) {
-    // Filter challenges where user is a participant
     return challengeState.allChallenges.where((challenge) {
       return challenge.participants.contains(user.userId);
     }).toList();

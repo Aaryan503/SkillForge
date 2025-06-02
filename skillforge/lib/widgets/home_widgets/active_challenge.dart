@@ -67,7 +67,6 @@ class ActiveChallengeCard extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(child: _buildChallengeInfo()),
-                _buildPlayButton(),
               ],
             ),
           ),
@@ -108,18 +107,6 @@ class ActiveChallengeCard extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildPlayButton() {
-    return IconButton(
-      icon: const Icon(
-        Icons.play_circle_fill,
-        color: Colors.white,
-        size: 42,
-      ),
-      onPressed: () {
-      },
     );
   }
 }

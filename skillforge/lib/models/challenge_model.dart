@@ -1,6 +1,5 @@
-
 class Challenge {
-  final String id;
+  final int id;
   final String title;
   final String description;
   final String language;

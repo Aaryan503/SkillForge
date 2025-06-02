@@ -24,9 +24,15 @@ class ChallengeTabContentWidget extends StatelessWidget {
           challengeColor: challengeColor,
         );
       case 1:
-        return ChallengeCommunityTab(challengeColor: challengeColor);
+        return ChallengeCommunityTab(
+          challengeColor: challengeColor,
+          challenge: challenge,
+        );
       default:
-        return const SizedBox.shrink();
+                return ChallengeCheckpointTab(
+          challenge: challenge,
+          challengeColor: challengeColor,
+        );
     }
   }
 }

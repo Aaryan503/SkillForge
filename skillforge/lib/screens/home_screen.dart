@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skillforge/providers/user_provider.dart';
 import 'package:skillforge/screens/create_challenge_screen.dart';
 import 'profile_screen.dart';
 import '../providers/challenge_provider.dart';
@@ -7,6 +8,7 @@ import '../widgets/home_widgets/search_bar.dart';
 import '../widgets/home_widgets/active_challenge.dart';
 import '../widgets/home_widgets/challenge_list.dart';
 import '../providers/search_provider.dart';
+import 'user_search_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -41,22 +43,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
     
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: NestedScrollView(
-            headerSliverBuilder: (context, innerBoxIsScrolled) {
-              return [
-                _buildAppBarHeader(),
-                _buildSearchBar(),
-                _buildActiveChallenge(challengeState),
-                if (searchState.query.isEmpty) _buildTabBar(),
-              ];
-            },
-            body: searchState.query.isNotEmpty 
-                ? _buildSearchResults(searchState)
-                : _buildTabBarView(challengeState),
-          ),
+      appBar: _buildAppBar(),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
+            return [
+              _buildSearchBar(),
+              _buildActiveChallenge(challengeState),
+              if (searchState.query.isEmpty) _buildTabBar(),
+            ];
+          },
+          body: searchState.query.isNotEmpty 
+              ? _buildSearchResults(searchState)
+              : _buildTabBarView(challengeState),
         ),
       ),
       floatingActionButton: _buildCreateButton(),
@@ -64,32 +64,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
     );
   }
 
-  SliverAppBar _buildAppBarHeader() {
-    return SliverAppBar(
-      floating: true,
-      pinned: false,
+  AppBar _buildAppBar() {
+    return AppBar(
+      title: const Text(
+        'SkillForge',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 24,
+        ),
+      ),
       backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
+      scrolledUnderElevation: 0,
       automaticallyImplyLeading: false,
-      expandedHeight: 120,
-      collapsedHeight: 80,
-      flexibleSpace: Stack(
-        children: [
-          Positioned(
-            top: 16,
-            right: 0,
-            child: IconButton(
-              icon: const Icon(Icons.person, size: 32),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.search),
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const UserSearchScreen()),
+            );
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.person, size: 28),
+          onPressed: () {
+            final userId = ref.read(userProvider).userId;
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ProfileScreen(userId: userId),
+              ),
+            );
+          },
+        ),
+        const SizedBox(width: 8),
+      ],
     );
   }
 
@@ -107,9 +117,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
 
   SliverToBoxAdapter _buildActiveChallenge(ChallengeState challengeState) {
     return SliverToBoxAdapter(
-      child: challengeState.activeChallenges.isNotEmpty
-          ? ActiveChallengeCard(challenge: challengeState.activeChallenges.first)
-          : const SizedBox.shrink(),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: challengeState.activeChallenges.isNotEmpty
+            ? ActiveChallengeCard(challenge: challengeState.activeChallenges.first)
+            : const SizedBox.shrink(),
+      ),
     );
   }
 
@@ -120,12 +133,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
       automaticallyImplyLeading: false,
       toolbarHeight: 0,
       elevation: 0,
+      scrolledUnderElevation: 0,
       bottom: TabBar(
         controller: _tabController,
         labelColor: Theme.of(context).colorScheme.primary,
         unselectedLabelColor: Colors.grey,
         indicatorColor: Theme.of(context).colorScheme.primary,
         indicatorSize: TabBarIndicatorSize.label,
+        labelStyle: const TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 16,
+        ),
+        unselectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.w500,
+          fontSize: 16,
+        ),
         tabs: const [
           Tab(text: 'All'),
           Tab(text: 'Popular'),
@@ -175,13 +197,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
   FloatingActionButton _buildCreateButton() {
     return FloatingActionButton.extended(
       onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const CreateChallengeScreen()),
-    );
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const CreateChallengeScreen()),
+        );
       },
       icon: const Icon(Icons.add),
       label: const Text('Create Challenge'),
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      foregroundColor: Theme.of(context).colorScheme.onPrimary,
     );
   }
 
@@ -194,6 +218,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
         });
       },
       type: BottomNavigationBarType.fixed,
+      selectedItemColor: Theme.of(context).colorScheme.primary,
+      unselectedItemColor: Colors.grey,
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.home_outlined),
