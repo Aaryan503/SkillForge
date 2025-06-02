@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:skillforge/screens/create_checkpoint_screen.dart';
 import '../models/challenge_model.dart';
 import '../providers/challenge_provider.dart';
 import '../providers/user_provider.dart';
@@ -424,20 +425,18 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
       );
 
       // Create challenge through provider
-      // final createdChallenge = await ref.read(challengeProvider.notifier).createChallenge(challenge);
+      final createdChallenge = await ref.read(challengeProvider.notifier).createChallenge(challenge);
 
       // Navigate to checkpoint creation screen
       if (mounted) {
+        Navigator.of(context).pop();
         // Navigate to checkpoint creation screen (you'll implement this)
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => CreateCheckpointsScreen(
-        //       challengeId: createdChallenge.id,
-        //       challengeTitle: createdChallenge.title,
-        //     ),
-        //   ),
-        // );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CreateCheckpointsScreen(challengeId: createdChallenge.id, challengeTitle: createdChallenge.title)
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -455,29 +454,5 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
         });
       }
     }
-  }
-}
-
-// Placeholder for the checkpoint creation screen
-class CreateCheckpointsScreen extends StatelessWidget {
-  final String challengeId;
-  final String challengeTitle;
-
-  const CreateCheckpointsScreen({
-    Key? key,
-    required this.challengeId,
-    required this.challengeTitle,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Add Checkpoints to: $challengeTitle'),
-      ),
-      body: const Center(
-        child: Text('Checkpoint creation screen will be implemented here'),
-      ),
-    );
   }
 }

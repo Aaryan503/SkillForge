@@ -21,11 +21,17 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
   final _signupEmailController = TextEditingController();
   final _signupPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _signupUsernameController = TextEditingController(); // <-- Add this
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      setState(() {
+        // This triggers a rebuild when tab changes
+      });
+    });
   }
 
   @override
@@ -36,110 +42,110 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
     _signupEmailController.dispose();
     _signupPasswordController.dispose();
     _confirmPasswordController.dispose();
+    _signupUsernameController.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 40),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary,
-                          borderRadius: BorderRadius.circular(16),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 40),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Icon(
+                            Icons.school_outlined,
+                            color: Colors.white,
+                            size: 32,
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.school_outlined,
-                          color: Colors.white,
-                          size: 32,
+                        const SizedBox(width: 16),
+                        Text(
+                          'SkillForge',
+                          style: GoogleFonts.poppins(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 16),
-                      Text(
-                        'SkillForge',
-                        style: GoogleFonts.poppins(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Welcome!',
-                    style: GoogleFonts.poppins(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
+                      ],
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 40),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: TabBar(
-                  controller: _tabController,
-                  indicator: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  labelColor: Colors.white,
-                  unselectedLabelColor: Colors.grey[600],
-                  labelStyle: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
-                  unselectedLabelStyle: GoogleFonts.poppins(
-                    fontWeight: FontWeight.normal,
-                    fontSize: 16,
-                  ),
-                  tabs: const [
-                    Tab(text: 'Login'),
-                    Tab(text: 'Sign Up'),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Welcome!',
+                      style: GoogleFonts.poppins(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 32),
-              SizedBox(
-                height: 400,
-                child: TabBarView(
-                  controller: _tabController,
+                const SizedBox(height: 40),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: TabBar(
+                    controller: _tabController,
+                    indicator: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    labelColor: Colors.white,
+                    unselectedLabelColor: Colors.grey[600],
+                    labelStyle: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                    unselectedLabelStyle: GoogleFonts.poppins(
+                      fontWeight: FontWeight.normal,
+                      fontSize: 16,
+                    ),
+                    tabs: const [
+                      Tab(text: 'Login'),
+                      Tab(text: 'Sign Up'),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
+                // Use IndexedStack instead of TabBarView to avoid height constraints
+                IndexedStack(
+                  index: _tabController.index,
                   children: [
                     _buildLoginForm(),
                     _buildSignUpForm(),
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-
   Widget _buildLoginForm() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         _buildTextField(
           controller: _loginEmailController,
@@ -186,7 +192,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
   Widget _buildSignUpForm() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
+        const SizedBox(height: 16),
+        _buildTextField(
+          controller: _signupUsernameController,
+          hintText: 'Username',
+          prefixIcon: Icons.person_outline,
+        ),
         const SizedBox(height: 16),
         _buildTextField(
           controller: _signupEmailController,
@@ -298,7 +311,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
     );
   }
 
-
   void _handleLogin() async {
     if (_loginEmailController.text.isEmpty || _loginPasswordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -315,7 +327,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
 
     try {
       await ref.read(userProvider.notifier).signIn(email, password);
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -337,7 +348,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
   }
 
   void _handleSignUp() async {
-    if (_signupEmailController.text.isEmpty ||
+    if (_signupUsernameController.text.isEmpty ||
+        _signupEmailController.text.isEmpty ||
         _signupPasswordController.text.isEmpty ||
         _confirmPasswordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -359,11 +371,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
       return;
     }
 
-    final email = _signupEmailController.text;
-    final password = _signupPasswordController.text;
+    final username = _signupUsernameController.text.trim();
+    final email = _signupEmailController.text.trim();
+    final password = _signupPasswordController.text.trim();
 
     try {
-      await ref.read(userProvider.notifier).signUp(email, password);
+      await ref.read(userProvider.notifier).signUp(email, password, username);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/challenge_model.dart';
-import '../screens/challenge_detail_screen.dart';
+import '../../models/challenge_model.dart';
+import '../../screens/challenge_detail_screen.dart';
 
 class ActiveChallengeCard extends StatelessWidget {
   final Challenge challenge;

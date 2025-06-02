@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skillforge/screens/create_challenge_screen.dart';
+import 'profile_screen.dart';
 import '../providers/challenge_provider.dart';
-import '../widgets/home_header.dart';
-import '../widgets/search_bar.dart';
-import '../widgets/active_challenge.dart';
-import '../widgets/challenge_list.dart';
+import '../widgets/home_widgets/search_bar.dart';
+import '../widgets/home_widgets/active_challenge.dart';
+import '../widgets/home_widgets/challenge_list.dart';
 import '../providers/search_provider.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -72,11 +73,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
       automaticallyImplyLeading: false,
       expandedHeight: 120,
       collapsedHeight: 80,
-      flexibleSpace: FlexibleSpaceBar(
-        background: HomeHeader(
-          onProfileTap: () {
-          },
-        ),
+      flexibleSpace: Stack(
+        children: [
+          Positioned(
+            top: 16,
+            right: 0,
+            child: IconButton(
+              icon: const Icon(Icons.person, size: 32),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -163,6 +175,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
   FloatingActionButton _buildCreateButton() {
     return FloatingActionButton.extended(
       onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const CreateChallengeScreen()),
+    );
       },
       icon: const Icon(Icons.add),
       label: const Text('Create Challenge'),

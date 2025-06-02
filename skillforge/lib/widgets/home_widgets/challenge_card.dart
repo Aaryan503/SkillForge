@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/challenge_model.dart';
-import '../screens/challenge_detail_screen.dart';
+import 'package:skillforge/providers/challenge_provider.dart';
+import '../../models/challenge_model.dart';
+import '../../screens/challenge_detail_screen.dart';
 
 class ChallengeCard extends ConsumerWidget {
   final Challenge challenge;
@@ -20,12 +21,11 @@ class ChallengeCard extends ConsumerWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ChallengeDetailScreen(challenge: challenge),
-            ),
-          );
+            Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (context) => ChallengeDetailScreen(challenge: challenge),
+    ),
+  );
         },
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -82,7 +82,7 @@ class ChallengeCard extends ConsumerWidget {
                   const SizedBox(width: 16),
                   Icon(Icons.star, size: 16, color: Colors.grey[600]),
                   const SizedBox(width: 4),
-                  Text('${challenge.difficulty} difficulty'),
+                  Text(' difficulty'),
                 ],
               ),
               const SizedBox(height: 12),
@@ -100,7 +100,7 @@ class ChallengeCard extends ConsumerWidget {
                 alignment: Alignment.centerRight,
                 child: ElevatedButton(
                   onPressed: () {
-                    // ref.read(challengeProvider.notifier).joinChallenge(challenge.id);
+                    ref.read(challengeProvider.notifier);
                   },
                   child: const Text('Join'),
                 ),
