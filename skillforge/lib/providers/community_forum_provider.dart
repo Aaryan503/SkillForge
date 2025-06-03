@@ -43,16 +43,11 @@ class CommunityForumNotifier extends StateNotifier<CommunityForumState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      // Debug: print challengeId being used
-      print('Loading messages for challengeId: $challengeId');
       final response = await _supabase
           .from('community_posts')
           .select()
-          .eq('challenge_id', challengeId) // challengeId should be int
+          .eq('challenge_id', challengeId)
           .order('created_at', ascending: true);
-
-      // Debug: print response from Supabase
-      print('Supabase response for challengeId $challengeId: $response');
 
       final List<CommunityForumMessage> allMessages = (response as List)
           .map((json) => CommunityForumMessage.fromJson(json))
